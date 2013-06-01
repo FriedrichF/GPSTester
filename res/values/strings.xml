@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GPSTester</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">GPS Test</string>
+    <string name="NaviLabel">Navigation:</string>
+    <string name="IntLabel">Intervall:</string>
+    <string name="GPSCheck">GPS</string>
+    <string name="InternetCheck">Internet</string>
+    <string name="Meter">Meter:</string>
+    <string name="Zeit">Zeit in s:</string>
+
+</resources>
