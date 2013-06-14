@@ -11,6 +11,7 @@ import java.util.Locale;
 import org.xmlpull.v1.XmlSerializer;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.app.Activity;
 import android.util.Log;
 import android.util.Xml;
@@ -31,9 +32,16 @@ public class GPSTesterActivity extends Activity implements OnSeekBarChangeListen
 	SeekBar meterBar, timeBar;
 	public static TextView meter, time, timeBarValue, meterBarValue;
 	
+	// The minimum distance to change Updates in meters
+    public static long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
+ 
+    // The minimum time between updates in milliseconds
+    public static long MIN_TIME_BW_UPDATES = 0;
+    
+    public static Handler handler = new Handler();
+	
 	GPSTracker gps;
 	public static drawTrack view;
-	public static boolean getGps = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,9 +77,11 @@ public class GPSTesterActivity extends Activity implements OnSeekBarChangeListen
 		{
 			public void onClick(View v)
 			{
-				GPSTracker.MIN_DISTANCE_CHANGE_FOR_UPDATES = Long.parseLong(meterBarValue.getText().toString());
-				GPSTracker.MIN_TIME_BW_UPDATES = Long.parseLong(GPSTesterActivity.timeBarValue.getText().toString())*1000;
-				getGps = true;
+				MIN_DISTANCE_CHANGE_FOR_UPDATES = Long.parseLong(meterBarValue.getText().toString());
+				MIN_TIME_BW_UPDATES = Long.parseLong(GPSTesterActivity.timeBarValue.getText().toString())*1000;
+				meterBarValue.setText("asdf");
+				handler.postDelayed(gps.runnable, MIN_TIME_BW_UPDATES);
+				
 			}
 		});
 		
@@ -81,7 +91,7 @@ public class GPSTesterActivity extends Activity implements OnSeekBarChangeListen
 		{
 			public void onClick(View v)
 			{
-				getGps = false;
+				handler.removeCallbacks(gps.runnable);
 				
 				File GpsTesterFolder = new File(Environment.getExternalStorageDirectory()+"/GPSTester");
 				if (!GpsTesterFolder.exists()) {

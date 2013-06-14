@@ -1,21 +1,18 @@
 package com.example.gpstester;
 
 import java.util.ArrayList;
-
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
 
-public class GPSTracker extends Service implements LocationListener {
+public class GPSTracker extends Service {
 	private final Context mContext;
 	 
     // flag for GPS status
@@ -38,105 +35,87 @@ public class GPSTracker extends Service implements LocationListener {
     
     boolean isfirstMove = true;
  
-    // The minimum distance to change Updates in meters
-    public static long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
- 
-    // The minimum time between updates in milliseconds
-    public static long MIN_TIME_BW_UPDATES = 0;
- 
     // Declaring a Location Manager
-    protected LocationManager locationManager;
+    protected LocationManager locationManagerGPS;
+    protected LocationManager locationManagerNetwork;
  
     public GPSTracker(Context context) {
         this.mContext = context;
         
         try {
-	        locationManager = (LocationManager) mContext
+	        locationManagerGPS = (LocationManager) mContext
 	                .getSystemService(LOCATION_SERVICE);
-	        
-	        locationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+	        locationManagerNetwork = (LocationManager) mContext
+	                .getSystemService(LOCATION_SERVICE);
         } catch (Exception e) {
-	        e.printStackTrace();
+        	e.printStackTrace();
+        	Log.d("asdf", e.toString());
 	    }
     }
 
-	@Override
-	public void onLocationChanged(Location location) {
-		try {
-	        locationManager = (LocationManager) mContext
-	                .getSystemService(LOCATION_SERVICE);
-	
-	        // getting GPS status
-	        isGPSEnabled = locationManager
-	                .isProviderEnabled(LocationManager.GPS_PROVIDER);
-	
-	        // getting network status
-	        isNetworkEnabled = locationManager
-	                .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-	
-	        if (!isGPSEnabled && !isNetworkEnabled && !GPSTesterActivity.getGps) {
-	            // no network provider is enabled
-	        } else {
-	            this.canGetLocation = true;
-	            // First get location from Network Provider
-	            if (isNetworkEnabled && GPSTesterActivity.internetCheck.isChecked()) {
-	                locationManager.requestLocationUpdates(
-	                        LocationManager.NETWORK_PROVIDER,
-	                        MIN_TIME_BW_UPDATES,
-	                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-	                Log.d("Network", "Network");
-	                if (locationManager != null) {
-	                    location = locationManager
-	                            .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-	                    if (location != null) {
-	                        latitude = location.getLatitude();
-	                        longitude = location.getLongitude();
-	                    }
-	                }
-	            }
-	            if(longitude != 0.0 && latitude != 0.0)
-	            	gpsInternetTracks.add(new GpsTrack(longitude, latitude));
-	            // if GPS Enabled get lat/long using GPS Services
-	            if (isGPSEnabled && GPSTesterActivity.gpsCheck.isChecked()) {
-	                //if (location == null) {
-	                    locationManager.requestLocationUpdates(
-	                            LocationManager.GPS_PROVIDER,
-	                            MIN_TIME_BW_UPDATES,
-	                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-	                    Log.d("GPS Enabled", "GPS Enabled");
-	                    if (locationManager != null) {
-	                        location = locationManager
-	                                .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-	                        if (location != null) {
-	                            gpslatitude = location.getLatitude();
-	                            gpslongitude = location.getLongitude();
-	                        }
-	                    }
-	                //}
-	            }
-	        }
-	        if(gpslongitude != 0.0 && gpslatitude != 0.0)
-	        	gpsTracks.add(new GpsTrack(gpslongitude, gpslatitude));
-	
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	}
-		
-	@Override
-	public void onProviderDisabled(String provider) {
-	}
-	
-	@Override
-	public void onProviderEnabled(String provider) {
-	}
-	
-	@Override
-	public void onStatusChanged(String provider, int status, Bundle extras) {
-	}
+    public Runnable runnable = new Runnable() {
+    	   @Override
+    	   public void run() {
+				try {
+					locationManagerGPS = (LocationManager) mContext
+			                .getSystemService(LOCATION_SERVICE);
+			        locationManagerNetwork = (LocationManager) mContext
+			                .getSystemService(LOCATION_SERVICE);
+			
+			        // getting GPS status
+			        isGPSEnabled = locationManagerGPS
+			                .isProviderEnabled(LocationManager.GPS_PROVIDER);
+			
+			        // getting network status
+			        isNetworkEnabled = locationManagerNetwork
+			                .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+			
+			        if (!isGPSEnabled && !isNetworkEnabled) {
+			            // no network provider is enabled
+			        } else {
+			            // First get location from Network Provider
+			            if (isNetworkEnabled && GPSTesterActivity.internetCheck.isChecked()) {
+			                Log.d("Network", "Network");
+			                if (locationManagerGPS != null) {
+			                    location = locationManagerNetwork
+			                            .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			                    if (location != null) {
+			                        latitude = location.getLatitude();
+			                        longitude = location.getLongitude();
+			                    }
+			                }
+			            }
+			            if(longitude != 0.0 && latitude != 0.0){
+			            	gpsInternetTracks.add(new GpsTrack(longitude, latitude));
+			            	Log.d("Network", "fix");
+			            }
+			            // if GPS Enabled get lat/long using GPS Services
+			            if (isGPSEnabled && GPSTesterActivity.gpsCheck.isChecked()) {
+			                //if (location == null) {
+			                    Log.d("GPS Enabled", "GPS Enabled");
+			                    if (locationManagerGPS != null) {
+			                        location = locationManagerGPS
+			                                .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			                        if (location != null) {
+			                            gpslatitude = location.getLatitude();
+			                            gpslongitude = location.getLongitude();
+			                        }
+			                    }
+			                //}
+			            }
+			        }
+			        if(gpslongitude != 0.0 && gpslatitude != 0.0){
+			        	gpsTracks.add(new GpsTrack(gpslongitude, gpslatitude));
+			        	Log.d("GPS", "fix");
+			        }
+			        
+				} catch (Exception e) {
+			        e.printStackTrace();
+			    }
+				GPSTesterActivity.handler.postDelayed(this, GPSTesterActivity.MIN_TIME_BW_UPDATES);
+			}
+    };
+   
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
