@@ -112,4 +112,35 @@
         android:text="0"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/timeToRun"
+        android:layout_alignLeft="@+id/timeToRun"
+        android:text="Mess Zeit in Min"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/timeToRun"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/InternetCheck"
+        android:layout_marginBottom="23dp"
+        android:layout_toRightOf="@+id/start"
+        android:ems="10"
+        android:inputType="number" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/IntLabel"
+        android:layout_alignLeft="@+id/timeToRun"
+        android:text="0"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
 </RelativeLayout>
